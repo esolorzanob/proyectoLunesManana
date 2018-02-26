@@ -1,13 +1,14 @@
 <?php
 date_default_timezone_set("America/Costa_Rica");
+
 $usuario = "root";
 $password = "Solorzano84";
-$servername = "18.217.173.77";
-$dbname = "proyecto_lunes";
+$servername = "18.219.254.158";
+$dbname = "proyecto_lunes_noche";
 $conn = new mysqli($servername, $usuario, $password, $dbname);
 mysqli_set_charset($conn,"utf8");
 if($_POST["metodo"] == "select"){
-    $sql = "select * from usuarios where usuario ='".$_POST["usuario"]."'";
+    $sql = "select * from Usuarios where usuario ='".$_POST["usuario"]."'";
     $result = $conn->query($sql);
     if($result->num_rows > 0){
         echo json_encode(mysqli_fetch_assoc($result));
@@ -64,14 +65,46 @@ if($_POST["metodo"] == "select"){
         .$_POST["marca"]."', '"
         .date("d/m/Y")."')";
     }else if($_POST["metodo"] == "editar"){
-        $sql = "update usuarios set 
-        nombre='".$_POST["nombre"]."',
-        apellidos='".$_POST["apellidos"]."',
-        telefono='".$_POST["telefono"]."',
-        correo='".$_POST["correo"]."',
-        direccion='".$_POST["direccion"]."',
-        usuario='".$_POST["usuario"]."',
-        password='".$_POST["password"]."' where idusuarios = ".$_POST["idusuarios"];
+        $caracteristicas = array();
+        foreach ($_POST as $key => $value){
+            if(preg_match('/carac/',$key)){
+                array_push($caracteristicas, $value);
+            }
+        }
+        $caracteristicas = join(';', $caracteristicas);
+        if(is_uploaded_file($_FILES['imagen']['tmp_name'])){
+            $target_dir = "../imgs/";
+            $target_file = $target_dir . basename($_FILES["imagen"]["name"]);
+            if ( 0 < $_FILES['imagen']['error'] ) {
+               echo 'Error: ' . $_FILES['imagen']['error'] . '<br>';
+            }
+            else {
+              move_uploaded_file($_FILES['imagen']['tmp_name'], $target_file);
+              echo "Exito";
+            }
+            $sql = "update productos set 
+            nombre='".$_POST["nombre"]."',
+            descripcion='".$_POST["descripcion"]."',
+            modelo='".$_POST["modelo"]."',
+            idCategoria=".$_POST["categoria"].",
+            precio='".$_POST["precio"]."',
+            caracteristicas='".$caracteristicas."',
+            cantidad=".$_POST["cantidad"].",
+            marca='".$_POST["marca"]."',
+            imagen='".$_FILES['imagen']['name']."'
+            where idproductos = ".$_POST["idproductos"];
+        }else{
+            $sql = "update productos set 
+            nombre='".$_POST["nombre"]."',
+            descripcion='".$_POST["descripcion"]."',
+            modelo='".$_POST["modelo"]."',
+            idCategoria=".$_POST["categoria"].",
+            precio='".$_POST["precio"]."',
+            caracteristicas='".$caracteristicas."',
+            cantidad=".$_POST["cantidad"].",
+            marca='".$_POST["marca"]."'
+            where idproductos = ".$_POST["idproductos"];
+        } 
     }
 
     if($conn->query($sql) === TRUE){
@@ -79,6 +112,7 @@ if($_POST["metodo"] == "select"){
     }else{
         echo "Error";
     }
+    
 
 }
 
