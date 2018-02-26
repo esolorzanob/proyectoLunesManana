@@ -1,8 +1,9 @@
 function login() {
-    var usuario = {};
-    usuario.usuario = $('#username').val();
-    usuario.password = $('#pass').val();
-    usuario.metodo = "select";
+    var usuario = {
+        usuario: $('#usuario').val(),
+        password: $('#pass').val(),
+        metodo: "select"
+    }
     $.ajax({
         url: "../php/usuario.php",
         method: "POST",
@@ -11,6 +12,7 @@ function login() {
             console.log(xhr.statusText);
         },
         success: function (usuario_response) {
+
             if (usuario_response == "Error") {
                 $('#mensaje').text("El usuario digitado no existe");
             } else {
@@ -35,16 +37,17 @@ function logout() {
     sessionStorage.removeItem('usuarioLogueado');
     window.location.href = 'index.html';
 }
+
 function registro() {
     var usuario = {
-        usuario: $('#username').val(),
+        usuario: $('#usuario').val(),
         password: $('#pass').val(),
         nombre: $('#nombre').val(),
-        apellidos: $('#apellidos').val(),
         correo: $('#correo').val(),
+        pregunta: $('#pregunta').val(),
+        respuesta: $('#respuesta').val(),
         direccion: $('#direccion').val(),
         telefono: $('#telefono').val(),
-        rol: '1',
         metodo: 'registro'
     }
     $.ajax({
@@ -59,17 +62,17 @@ function registro() {
                 alert('Se ha registrado con éxito!');
                 window.location.href = 'login.html';
             } else {
-                alert('Se ha producido un error al registrarse, inténtelo de nuevo');
+                alert('Se ha producido un error al registrarse');
             }
         }
     });
     return false;
 }
 
-function traerUsuarioMiPerfil() {
+function traerUsuario(id) {
     var usuario = {
-        id: JSON.parse(sessionStorage.getItem('usuarioLogueado')).idusuarios,
-        metodo: "traerUsuario"
+        id: id,
+        metodo: 'traerUsuario'
     }
     $.ajax({
         url: "../php/usuario.php",
@@ -80,51 +83,29 @@ function traerUsuarioMiPerfil() {
         },
         success: function (usuario_response) {
             var usuarioGuardado = JSON.parse(usuario_response);
-            $('#nombre').text(usuarioGuardado.nombre + " " + usuarioGuardado.apellidos);
-            $('#correo').append(usuarioGuardado.correo);
-            $('#telefono').append(usuarioGuardado.telefono || 'No especificado')
-            $('#direccion').append(usuarioGuardado.direccion || 'No especificado');
-            $('#usuario').append(usuarioGuardado.usuario);
-        }
-    });
-}
-
-function traerUsuarioEditar() {
-    var usuario = {
-        id: JSON.parse(sessionStorage.getItem('usuarioLogueado')).idusuarios,
-        metodo: "traerUsuario"
-    }
-    $.ajax({
-        url: "../php/usuario.php",
-        method: "POST",
-        data: usuario,
-        error: function (xhr) {
-            console.log(xhr.statusText);
-        },
-        success: function (usuario_response) {
-            usuarioGuardado = JSON.parse(usuario_response);
-            $('#username').val(usuarioGuardado.usuario);
+            $('#usuario').val(usuarioGuardado.usuario);
             $('#pass').val(usuarioGuardado.password);
             $('#nombre').val(usuarioGuardado.nombre);
-            $('#apellidos').val(usuarioGuardado.apellidos);
             $('#correo').val(usuarioGuardado.correo);
-            $('#direccion').val(usuarioGuardado.direccion);
             $('#telefono').val(usuarioGuardado.telefono);
-            $('#idusuarios').val(usuarioGuardado.idusuarios);
+            $('#pregunta').val(usuarioGuardado.pregunta_secreta);
+            $('#respuesta').val(usuarioGuardado.respuesta);
+            $('#direccion').val(usuarioGuardado.direccion);
+            $('#id').val(usuarioGuardado.idUsuarios);
         }
     });
 }
-
-function editarUsuario() {
+function editar() {
     var usuario = {
-        usuario: $('#username').val(),
+        usuario: $('#usuario').val(),
         password: $('#pass').val(),
         nombre: $('#nombre').val(),
-        apellidos: $('#apellidos').val(),
         correo: $('#correo').val(),
+        pregunta_secreta: $('#pregunta').val(),
+        respuesta: $('#respuesta').val(),
         direccion: $('#direccion').val(),
         telefono: $('#telefono').val(),
-        idusuarios: $('#idusuarios').val(),
+        idUsuarios: $('#id').val(),
         metodo: 'editar'
     }
     $.ajax({
@@ -136,12 +117,48 @@ function editarUsuario() {
         },
         success: function (usuario_response) {
             if (usuario_response == 'Exito') {
-                alert('Se ha editado con éxito!');
+                alert('Se ha modificado con éxito!');
+                sessionStorage.setItem('usuarioLogueado', JSON.stringify(usuario));
                 window.location.href = 'miperfil.html';
             } else {
-                alert('Se ha producido un error al editar, inténtelo de nuevo');
+                alert('Se ha producido un error al modificar');
             }
         }
     });
     return false;
+}
+
+function listarUsuarios() {
+    var usuario = {
+        metodo: "listar"
+    }
+    $.ajax({
+        url: "../php/usuario.php",
+        method: "POST",
+        data: usuario,
+        error: function (xhr) {
+            console.log(xhr.statusText);
+        },
+        success: function (usuario_response) {
+            var usuarios = JSON.parse(usuario_response);
+            usuarios.map(function (e) {
+                var tr = document.createElement('tr');
+                var nombre = document.createElement('td');
+                $(nombre).text(e.nombre);
+                $(tr).append(nombre);
+                var correo = document.createElement('td');
+                $(correo).text(e.correo);
+                $(tr).append(correo);
+                var usuario = document.createElement('td');
+                $(usuario).text(e.usuario);
+                $(tr).append(usuario);
+                var direccion = document.createElement('td');
+                $(direccion).text(e.direccion);
+                $(tr).append(direccion);
+                $('<td><a href="editarUsuario.html?' + e.idUsuarios + '"><i class="far fa-edit fa-lg verde"></i></a></td>').appendTo(tr);
+                $('<td><a class="block" onclick="bloquearUsuario(' + e.idUsuarios + ')"><i class="fas fa-ban fa-lg rojo"></i></a></td>').appendTo(tr);
+                $('#listaUsuarios').append(tr);
+            })
+        }
+    });
 }

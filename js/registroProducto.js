@@ -19,7 +19,7 @@ if (usuarioGuardado) {
 traerCategorias();
 var numCar = 2;
 function agregar() {
-    $('<div class="controls" ><input class="característica" type="text" name="carac' + numCar + '"><label id="quitar" onclick="quitar(this)"><i class="fas fa-minus-square fa-lg"></i></label></div>').appendTo('#caracteristicas')
+    $('<div class="controls" ><input class="característica" name="carac' + numCar + '" type="text"><label id="quitar" onclick="quitar(this)"> <i class="fas fa-minus-square fa-lg"></i></label></div>').appendTo('#caracteristicas');
     numCar++;
 }
 function quitar(elemento) {
