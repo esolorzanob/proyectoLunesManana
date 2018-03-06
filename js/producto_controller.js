@@ -15,7 +15,20 @@ function catalogo() {
             var contador = 0
             var numPagina = 1
             productos.map(function (producto) {
-                $('<div class="col-lg-4 col-sm-6 portfolio-item pagina' + numPagina + '"><div class="card h-100"><a href="producto.html?' + producto.idproductos + '"><img class="card-img-top" src="imgs/' + producto.imagen + '" alt=""></a><div class="card-body"><h4 class="card-title"><a href="producto.html?' + producto.idproductos + '" class="nombre">' + producto.nombre + '</a></h4><p class="card-text" class="descripcion">' + producto.descripcion + '</p><p class="card-text" class="precio">Precio: ' + producto.precio + ' colones</p></div></div></div>').appendTo('#catalogoContainer')
+                $('<div id="' + producto.idproductos + '" class="col-lg-4 col-sm-6 portfolio-item pagina' + numPagina + '"><div class="card h-100"><a href="producto.html?' + producto.idproductos + '"><img class="card-img-top" src="imgs/' + producto.imagen + '" alt=""></a><div class="card-body"><h4 class="card-title"><a href="producto.html?' + producto.idproductos + '" class="nombre">' + producto.nombre + '</a></h4><p class="card-text" class="descripcion">' + producto.descripcion + '</p><p class="card-text precio">Precio: ' + producto.precio + ' colones</p></div></div></div>').appendTo('#catalogoContainer')
+                if (producto.precioOferta) {
+                    var inicioOferta = producto.fechaInicioOferta.replace(/\-/g, ',');
+                    inicioOferta = new Date(inicioOferta);
+                    var finOferta = producto.fechaFinOferta.replace(/\-/g, ',');
+                    finOferta = new Date(finOferta);
+                    var hoy = new Date();
+                    hoy = hoy.setHours(0, 0, 0, 0);
+                    if (inicioOferta <= hoy && finOferta >= hoy) {
+                        $('#' + producto.idproductos).find('.precio').addClass("oldPrice");
+                        $('<p class="oferta">Oferta: ' + producto.precioOferta + '</p>').appendTo('#' + producto.idproductos + ' .card-body')
+                    }
+                }
+
                 contador++
                 if (contador == 6) {
                     contador = 0
@@ -58,6 +71,18 @@ function traerProducto(id) {
                 if (caracteristica.trim())
                     $('<li>' + caracteristica + '</li>').appendTo('#caracteristicas')
             })
+            if (producto.precioOferta) {
+                var inicioOferta = producto.fechaInicioOferta.replace(/\-/g, ',');
+                inicioOferta = new Date(inicioOferta);
+                var finOferta = producto.fechaFinOferta.replace(/\-/g, ',');
+                finOferta = new Date(finOferta);
+                var hoy = new Date();
+                hoy = hoy.setHours(0, 0, 0, 0);
+                if (inicioOferta <= hoy && finOferta >= hoy) {
+                    $('#precio').addClass("oldPrice");
+                    $('<p class="oferta">Oferta: ' + producto.precioOferta + '</p>').insertAfter('#precio')
+                }
+            }
         }
     })
 }
@@ -73,13 +98,7 @@ function agregarCarrito() {
         var carrito = [];
     }
     var productoActual = JSON.parse(sessionStorage.getItem('productoActual'))
-    var producto = {
-        nombre: productoActual.nombre,
-        marca: productoActual.marca,
-        imagen: productoActual.imagen,
-        precio: productoActual.precio
-    }
-    carrito.push(producto);
+    carrito.push(productoActual);
     sessionStorage.setItem('carrito', JSON.stringify(carrito));
     alert("El producto se agregó a su carro de compras")
 }
@@ -235,6 +254,7 @@ function traerProductoOferta(id) {
             $('#modelo').text(productoActual.modelo);
             $('#marca').text(productoActual.marca);
             $('#id').val(productoActual.idproductos);
+            $('#precio').append(productoActual.precio);
         }
     })
 }
@@ -259,4 +279,106 @@ function agregarOferta() {
         }
     })
     return false;
+}
+
+function traerProductosPrincipal() {
+    var producto = {
+        metodo: "listar"
+    }
+    $.ajax({
+        url: "../php/producto.php",
+        method: "POST",
+        data: producto,
+        error: function (xhr) {
+            console.log(xhr.statusText);
+        },
+        success: function (producto_response) {
+            var productos = JSON.parse(producto_response);
+            var i = 0;
+            productos.map(producto => {
+                if (producto.precioOferta) {
+                    $(`<div class="carousel-item" style="background-image: url('imgs/` + producto.imagen + `')">
+                    <div class="carousel-caption d-none d-md-block">
+                      <h3 class="amarillo">${producto.nombre}</h3>
+                      <p class="amarillo">${producto.descripcion}</p>
+                      <p class="amarillo">Precio de oferta: ${producto.precioOferta}</p>
+                    </div>
+                     </div>`).appendTo('#carouselExampleIndicators .carousel-inner');
+                    if (i == 0) $('#carouselExampleIndicators .carousel-inner .carousel-item').first().addClass('active')
+                    $('<li data-target="#carouselExampleIndicators" data-slide-to="' + i + '"></li>').appendTo('#carouselExampleIndicators .carousel-indicators')
+                    i++;
+                }
+            })
+        }
+    });
+}
+
+function contruirCarrito() {
+    var productos = JSON.parse(sessionStorage.getItem("carrito"));
+    productos.map(function (producto) {
+        $(`<div class="row producto" id=` + producto.idproductos + `>
+        <div class="col-lg-3">
+          <img class="img-fluid rounded mb-4 imagenEnCarrito" src="imgs/`+ producto.imagen + `" alt="">
+        </div>
+        <div class="col-lg-9">
+          <p class="nombre">`+ producto.nombre + `</p>
+          <p class="descripcion">`+ producto.descripcion + `</p>
+          <p class="marca"><b>Marca: </b>`+ producto.marca + ` </p>
+          <p class="modelo"><b>Modelo:</b>`+ producto.modelo + ` </p>
+          <p class="precio">Precio: </p>
+          <label>Cantidad:</label>
+          <input type="number" value="1" onchange="calcularCantidad()">
+        </div>
+      </div>`).appendTo('#productosContainer')
+        if (producto.precioOferta) {
+            var inicioOferta = producto.fechaInicioOferta.replace(/\-/g, ',');
+            inicioOferta = new Date(inicioOferta);
+            var finOferta = producto.fechaFinOferta.replace(/\-/g, ',');
+            finOferta = new Date(finOferta);
+            var hoy = new Date();
+            hoy = hoy.setHours(0, 0, 0, 0);
+            if (inicioOferta <= hoy && finOferta >= hoy) {
+                var precio = producto.precioOferta
+            } else {
+                var precio = producto.precio
+            }
+        } else {
+            var precio = producto.precio
+        }
+        $('#' + producto.idproductos).find('.precio').append(precio);
+        calcularCantidad();
+    })
+}
+
+function calcularCantidad() {
+    var total = 0;
+    $('.producto').each(function () {
+        var cantidad = parseInt($(this).find('input').val());
+        total += parseInt($(this).find('.precio').text().replace(/[^\d]/g, '')) * cantidad
+    })
+    $('#total label span').text(total);
+}
+
+function procesarPedido() {
+    var pedido = {};
+    pedido.idUsuarios = JSON.parse(sessionStorage.getItem('usuarioLogueado')).idUsuarios;
+    pedido.total = $('#total label span').text();
+    var idProductos = [];
+    $('.producto').each(function () {
+        idProductos.push($(this).attr('id'))
+    });
+    pedido.idProductos = idProductos;
+    pedido.fecha = new Date();
+    $.ajax({
+        url: "../php/pedido.php",
+        method: "POST",
+        data: pedido,
+        error: function (xhr) {
+            console.log(xhr.statusText)
+        },
+        success: function (pedido_response) {
+            alert(pedido_response);
+            //window.location.href = "catalogo.html";
+        }
+    })
 }

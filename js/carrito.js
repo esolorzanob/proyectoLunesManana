@@ -15,10 +15,12 @@ if (usuarioGuardado) {
     $('<a class="dropdown-item" href="misordenes.html">Mis Ordenes</a>').appendTo(div);
     $('<a class="dropdown-item" href="javascript:void(0);" onclick="logout()">Logout</a>').appendTo(div);
     $('#login').parent().append(div);
+    if (!sessionStorage.getItem('carrito')) {
+        $('<h1>El carrito está vacío<h1>').appendTo('#productosContainer')
+    } else {
+        contruirCarrito();
+    }
 } else {
-    $('#carritoBoton').prop('disabled', 'true');
-    $('#carritoBoton').text('Tiene que iniciar sesion para agregar a carrito')
+    alert('Tiene que estar logueado para usar el carrito');
+    window.location.href = "login.html"
 }
-var id = window.location.search;
-id = id.replace('?', '');
-traerProducto(id);

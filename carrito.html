@@ -87,7 +87,7 @@
     <div class="container">
 
       <!-- Page Heading/Breadcrumbs -->
-      <h1 class="mt-4 mb-3">Producto
+      <h1 class="mt-4 mb-3">Carrito
         <small>Detalles</small>
       </h1>
 
@@ -95,27 +95,16 @@
         <li class="breadcrumb-item">
           <a href="index.html">Principal</a>
         </li>
-        <li class="breadcrumb-item active">Producto</li>
+        <li class="breadcrumb-item active">Carrito</li>
       </ol>
 
       <!-- Intro Content -->
-      <div class="row">
-        <div class="col-lg-6">
-          <img class="img-fluid rounded mb-4" src="http://placehold.it/750x450" alt="" id="imagen">
-        </div>
-        <div class="col-lg-6">
-          <h2 id="nombre"></h2>
-          <p id="descripcion"></p>
-          <p id="marca"><b>Marca:</b> </p>
-          <p id="modelo"><b>Modelo:</b> </p>
-          <ul id="caracteristicas">
+      <div id="productosContainer">
 
-          </ul>
-          <h3 id="precio">Precio: </h3>
-          <button id="carritoBoton" class="btn btn-warning" onclick="agregarCarrito()"><i class="fas fa-cart-arrow-down fa-lg"></i>  Agregar a carrito</button>
-          <br>
-          <br>
-        </div>
+      </div>
+      <div id="total">
+        <label class="">Total: <span></span></label>
+        <button class="btn btn-warning" onclick="procesarPedido()">Procesar Pedido</button>
       </div>
       <!-- /.row -->
 
@@ -134,7 +123,7 @@
     <script src="vendor/jquery/jquery.min.js"></script>
     <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="js/producto_controller.js"></script>
-    <script src="js/producto.js"></script>
+    <script src="js/carrito.js"></script>
   </body>
 
 </html>

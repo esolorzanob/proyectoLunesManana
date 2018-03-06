@@ -56,3 +56,36 @@ text-align: center;
 .caracteristica{
   width: 95%;
 }
+
+.oldPrice{
+  text-decoration: line-through;
+}
+
+.oferta{
+  font-size: 1.6em;
+  color: red;
+}
+
+.amarillo{
+  color: yellow;
+}
+
+.producto {
+  border-bottom: 1px solid lightblue;
+  margin-bottom: 2%;
+  padding-bottom: 2%
+}
+
+.producto input{
+  width: 50px;
+}
+#total{
+  justify-content: flex-end;
+   display: flex;
+   margin-bottom: 3%;
+}
+
+#total label {
+  font-size: 2em;
+  margin-right: 30px;
+}
